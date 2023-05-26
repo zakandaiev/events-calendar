@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Events Calendar</title>
+
+	<meta charset="utf-8">
+	<meta name="author" content="github.com/zakandaiev">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport"
+		content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+	<link rel="icon" type="image/x-icon" sizes="any" href="./favicon.ico">
+	<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+	<link rel="icon" type="image/png" href="./favicon.png">
+	<link rel="apple-touch-icon" href="./favicon.png">
+
+	<style>
+		*,
+		::after,
+		::before {
+			box-sizing: border-box;
+			padding: 0;
+			margin: 0;
+		}
+
+		html,
+		body {
+			width: 100%;
+			min-width: 320px;
+			font-size: 10px;
+			position: relative;
+		}
+
+		html {
+			height: 100%;
+		}
+
+		body {
+			min-height: 100%;
+		}
+
+		body {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			position: relative;
+			overflow-x: hidden;
+			font-family: sans-serif;
+			font-size: 1.6rem;
+			font-weight: 400;
+			line-height: 1.6;
+			color: #000;
+			background: #f5f7fb;
+		}
+
+		.calendar {
+			width: 80% !important;
+			margin: 30px !important;
+		}
+	</style>
+
+	<link rel="stylesheet" href="./index.css">
+</head>
+
+<body>
+
+	<div class="calendar"></div>
+
+	<script src="./index.js"></script>
+	<script>
+		const events = []
+
+		function getRandomDate(start, end) {
+			return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString();
+		}
+
+		function getRandomEvent() {
+			const now = new Date();
+			const date_start = new Date(now.getFullYear(), now.getMonth() - 3);
+			const date_end = new Date(now.getFullYear(), now.getMonth() + 3);
+
+			return {
+				date: getRandomDate(date_start, date_end),
+				name: 'name_' + Math.random().toString(36).substr(2),
+				description: 'description_' + Math.random().toString(36).substr(2)
+			};
+		}
+
+		for(let i = 0; i < 100; i++) {
+			events.push(getRandomEvent());
+		}
+
+		const calendar = new Calendar(
+			document.querySelector('.calendar'),
+			{
+				events: events
+			}
+		);
+
+		document.addEventListener('click', event => {
+		const prev = event.target.closest('.calendar__prev');
+		const next = event.target.closest('.calendar__next');
+		const current = event.target.closest('.calendar__current');
+		const day_open = event.target.closest('.calendar__cell');
+		const day_close = event.target.closest('.calendar__day-close');
+
+		if (prev) {
+			event.preventDefault();
+			calendar.renderPrev();
+		}
+		if (next) {
+			event.preventDefault();
+			calendar.renderNext();
+		}
+		if (current) {
+			event.preventDefault();
+			calendar.renderCustomMonth();
+		}
+		if (day_open) {
+			event.preventDefault();
+			calendar.renderDay(day_open.getAttribute('data-date'));
+		}
+		if (day_close) {
+			event.preventDefault();
+			calendar.closeDay();
+		}
+	});
+
+	document.addEventListener('click', event => {
+		document.querySelectorAll('.dropdown').forEach(dd => {
+			dd.classList.remove('active');
+		});
+
+		const dropdown = event.target.closest('.dropdown');
+		const dropdown_item = event.target.closest('.dropdown__item');
+
+		if(!dropdown) {
+			return false;
+		}
+
+		event.preventDefault();
+
+		if(dropdown_item) {
+			dropdown.classList.add('active');
+		}
+
+		dropdown.classList.toggle('active');
+	});
+
+	</script>
+
+</body>
+
+</html>

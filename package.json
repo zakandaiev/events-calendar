@@ -1,0 +1,51 @@
+{
+	"name": "events-calendar",
+	"version": "1.0.0",
+	"description": "",
+	"keywords": [],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/zakandaiev/events-calendar"
+	},
+	"main": "index.js",
+	"scripts": {
+		"dev": "gulp",
+		"prod": "gulp --prod",
+		"build": "gulp --prod"
+	},
+	"browserslist": [
+		"last 10 versions",
+		"not dead"
+	],
+	"babel": {
+		"presets": [
+			"@babel/preset-env"
+		],
+		"ignore": [
+			"./src/js/ingored.js"
+		]
+	},
+	"author": "github.com/zakandaiev",
+	"license": "MIT",
+	"devDependencies": {
+		"@babel/core": "^7.21.8",
+		"@babel/preset-env": "^7.21.5",
+		"browser-sync": "^2.29.3",
+		"del": "^6.1.1",
+		"gulp": "^4.0.2",
+		"gulp-autoprefixer": "^8.0.0",
+		"gulp-babel": "^8.0.0",
+		"gulp-clean-css": "^4.3.0",
+		"gulp-file-include": "^2.3.0",
+		"gulp-group-css-media-queries": "^1.2.2",
+		"gulp-htmlmin": "^5.0.1",
+		"gulp-if": "^3.0.0",
+		"gulp-imagemin": "^7.1.0",
+		"gulp-load-plugins": "^2.0.8",
+		"gulp-newer": "^1.4.0",
+		"gulp-sass": "^5.1.0",
+		"gulp-terser": "^2.1.0",
+		"sass": "^1.62.1"
+	},
+	"dependencies": {}
+}
