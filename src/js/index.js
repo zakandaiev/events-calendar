@@ -28,24 +28,13 @@ class Calendar {
 
 		this.activeCell = null;
 
-		this.setDate(options.date || new Date());
-
-		console.log(this.date)
+		this.setDate(options.date);
 
 		if(this.node) {
 			this.init();
 			this.initListeners();
 			this.render();
 		}
-	}
-
-	weekCount(year, month_number) {
-    const firstOfMonth = new Date(year, month_number, 1);
-    const lastOfMonth = new Date(year, month_number + 1, 0);
-
-    const used = firstOfMonth.getDay() + 6 + lastOfMonth.getDate();
-
-    return Math.ceil(used / 7);
 	}
 
 	init() {
@@ -159,7 +148,7 @@ class Calendar {
 
 		tableRows.push(tableHeader);
 
-		for (let i = 1; i < this.weekCount(this.year, this.month); i++) {
+		for (let i = 1; i < this.getWeekCount(this.year, this.month); i++) {
 			const tableRow = document.createElement('div');
 			tableRow.classList.add('calendar__row');
 
@@ -257,25 +246,6 @@ class Calendar {
 
 		return eventsNode;
 	}
-
-  renderPrev() {
-		this.setDate(new Date(this.year, this.month - 1));
-		this.render();
-	}
-
-	renderNext() {
-		this.setDate(new Date(this.year, this.month + 1));
-		this.render();
-	}
-
-	renderCustomDate(date) {
-		this.setDate(date);
-		this.render();
-	}
-
-	updateTools() {
-		this.nodeNavCurrent.innerText = this.labels.month[this.month] + ' ' + this.year;
-  }
 
 	renderDay(cell) {
 		const dayDate = cell.date;
@@ -429,16 +399,24 @@ class Calendar {
 		return nodeMenu;
 	}
 
-  setDate(date) {
-		date = new Date(date);
-
-		this.year = date.getFullYear();
-		this.month = date.getMonth();
-		this.date = new Date(this.year, this.month);
-		this.start_date = new Date(this.year, this.month);
-		this.today = new Date();
-		this.today.setHours(0, 0, 0, 0);
+  renderPrev() {
+		this.setDate(new Date(this.year, this.month - 1));
+		this.render();
 	}
+
+	renderNext() {
+		this.setDate(new Date(this.year, this.month + 1));
+		this.render();
+	}
+
+	renderCustomDate(date) {
+		this.setDate(date);
+		this.render();
+	}
+
+	updateTools() {
+		this.nodeNavCurrent.innerText = this.labels.month[this.month] + ' ' + this.year;
+  }
 
 	formatEvents(events) {
 		if (!events || !events.length) {
@@ -469,10 +447,15 @@ class Calendar {
 		return events;
   }
 
-  getWeekday(date) {
-		let day = date.getDay();
-		if(day == 0) day = 7;
-		return day - 1;
+  setDate(date) {
+		date = date ? new Date(date) : new Date();
+
+		this.year = date.getFullYear();
+		this.month = date.getMonth();
+		this.date = new Date(this.year, this.month);
+		this.start_date = new Date(this.year, this.month);
+		this.today = new Date();
+		this.today.setHours(0, 0, 0, 0);
 	}
 
   isToday(date) {
@@ -481,6 +464,21 @@ class Calendar {
 
 	isDatesEqual(d1, d2) {
 		return (d1.toDateString() == d2.toDateString());
+	}
+
+  getWeekday(date) {
+		let day = date.getDay();
+		if(day == 0) day = 7;
+		return day - 1;
+	}
+
+	getWeekCount(year, month_number) {
+    const firstOfMonth = new Date(year, month_number, 1);
+    const lastOfMonth = new Date(year, month_number + 1, 0);
+
+    const used = firstOfMonth.getDay() + 6 + lastOfMonth.getDate();
+
+    return Math.ceil(used / 7);
 	}
 
   getDefault(type) {

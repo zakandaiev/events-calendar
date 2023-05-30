@@ -1,0 +1,35 @@
+<!DOCTYPE html><html lang="en"><head><title>Events Calendar</title><meta charset="utf-8"><meta name="author" content="github.com/zakandaiev"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=0"><link rel="icon" type="image/x-icon" sizes="any" href="./favicon.ico"><link rel="icon" type="image/svg+xml" href="./favicon.svg"><link rel="icon" type="image/png" href="./favicon.png"><link rel="apple-touch-icon" href="./favicon.png"><style>*,::after,::before{box-sizing:border-box;padding:0;margin:0}body,html{width:100%;min-width:320px;font-size:10px;position:relative}html{height:100%}body{min-height:100%}body{display:flex;justify-content:center;align-items:center;position:relative;overflow-x:hidden;font-family:sans-serif;font-size:1.6rem;font-weight:400;line-height:1.6;color:#000;background:#f5f7fb;padding:2em}</style><link rel="stylesheet" href="./index.css"></head><body><div class="calendar"></div><script src="./index.js"></script><script>const events = []
+
+		function getRandomDate(start, end) {
+			return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString();
+		}
+
+		function getRandomEvent() {
+			const now = new Date();
+			const date_start = new Date(now.getFullYear(), now.getMonth() - 3);
+			const date_end = new Date(now.getFullYear(), now.getMonth() + 3);
+
+			const id = Math.random().toString(36).substr(2);
+			const date = getRandomDate(date_start, date_end);
+			const name = 'name_' + id;
+			const description = 'description_' + id;
+			const onClick = (e) => console.log('trigger onClick for: ' + e.id);
+			const onView = (e) => console.log('trigger onView for: ' + e.id);
+			const onEdit = (e) => console.log('trigger onEdit for: ' + e.id);
+			const onDelete = (e) => console.log('trigger onDelete for: ' + e.id);
+
+			return { id, date, name, description, onClick, onView, onEdit, onDelete };
+		}
+
+		for(let i = 0; i < 100; i++) {
+			events.push(getRandomEvent());
+		}
+
+		new Calendar(
+			document.querySelector('.calendar'),
+			events,
+			{
+				onCreate: () => console.log('trigger onCreate'),
+				onDayCreate: (d) => console.log('trigger onDayCreate for: ' + d)
+			}
+		);</script></body></html>
