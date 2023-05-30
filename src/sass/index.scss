@@ -38,9 +38,12 @@
 	--transition-time: 0.3s;
 	--transition: all var(--transition-time);
 
+	width: 100%;
 	display: flex;
 	align-items: flex-start;
 	gap: var(--gap);
+	margin: calc(-1 * var(--gap));
+	padding: var(--gap);
 	transition: var(--transition);
 	overflow: hidden;
 
@@ -55,8 +58,8 @@
 	// .calendar__body
 	&__body {
 		flex-grow: 1;
+		width: 0;
 		display: block;
-		overflow: hidden;
 	}
 
 	// .calendar__button
@@ -396,6 +399,14 @@
 		cursor: pointer;
 		position: relative;
 
+		&.active {
+			.calendar__day-menu {
+				visibility: visible;
+				opacity: 1;
+				margin-top: 0.5em;
+			}
+		}
+
 		& > span {
 			position: absolute;
 			z-index: 1;
@@ -442,34 +453,15 @@
 		}
 	}
 
-	// .calendar__day-footer
-	&__day-footer {
-		flex-shrink: 0;
-		position: sticky;
-		z-index: 10;
-		bottom: 0;
-		display: block;
-		padding: 1em var(--gap);
-		border-top: var(--border);
-		background: var(--color-cell);
-
-		.calendar__button {
-			width: 100%;
-		}
-	}
-}
-
-.dropdown {
-	position: relative;
-
-	// .dropdown__menu
-	&__menu {
+	// .calendar__day-menu
+	&__day-menu {
 		position: absolute;
 		z-index: 2;
 		top: 100%;
-		left: 0;
 		right: 0;
-		padding: 8px 0;
+		width: max-content;
+		min-width: 10em;
+		padding: 0.5em 0;
 		border-radius: var(--radius);
 		border: var(--border) var(--color-border);
 		background: var(--color-cell);
@@ -478,64 +470,48 @@
 		transition: var(--transition);
 		visibility: hidden;
 		opacity: 0;
-		&_left {
-			width: max-content;
-			min-width: 150px;
-			left: 0;
-			right: auto;
-		}
-		&_right {
-			width: max-content;
-			min-width: 150px;
-			right: 0;
-			left: auto;
-		}
-		&_center {
-			width: max-content;
-			min-width: 150px;
-			left: 50%;
-			transform: translateX(-50%);
-			right: auto;
+
+		// .calendar__day-menu-item
+		&-item {
+			display: flex;
+			align-items: center;
+			padding: 0.5em 1em;
+			font-size: 0.875em;
+			transition: var(--transition);
+
+			&:hover, &:focus, &:active {
+				background: #f5f7fb;
+			}
+
+			svg, img {
+				flex-shrink: 0;
+				display: block;
+				width: 1em;
+				height: 1em;
+				margin-right: 0.5em;
+			}
+
+			span {
+				white-space: nowrap;
+				text-overflow: ellipsis;
+				overflow: hidden;
+			}
 		}
 	}
 
-	// .dropdown__item
-	&__item {
-		display: flex;
-		align-items: center;
-		padding: 0.5em 1em;
-		font-size: 0.875em;
-		transition: var(--transition);
+	// .calendar__day-footer
+	&__day-footer {
+		flex-shrink: 0;
+		position: sticky;
+		z-index: 1;
+		bottom: 0;
+		display: block;
+		padding: 1em var(--gap);
+		border-top: var(--border);
+		background: var(--color-cell);
 
-		&:hover, &:focus, &:active {
-			background: #f5f7fb;
-		}
-
-		&.active {
-			background: var(--color-border);
-		}
-
-		svg,img {
-			flex-shrink: 0;
-			display: block;
-			width: 1em;
-			height: 1em;
-			margin-right: 5px;
-		}
-
-		span {
-			white-space: nowrap;
-			text-overflow: ellipsis;
-			overflow: hidden;
-		}
-	}
-
-	// .dropdown_active
-	&.active {
-		.dropdown__menu {
-			visibility: visible;
-			opacity: 1;
-			margin-top: 10px;
+		.calendar__button {
+			width: 100%;
 		}
 	}
 }

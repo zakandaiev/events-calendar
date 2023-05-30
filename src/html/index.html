@@ -52,11 +52,7 @@
 			line-height: 1.6;
 			color: #000;
 			background: #f5f7fb;
-		}
-
-		.calendar {
-			width: 80% !important;
-			margin: 30px !important;
+			padding: 2em;
 		}
 	</style>
 
@@ -80,74 +76,30 @@
 			const date_start = new Date(now.getFullYear(), now.getMonth() - 3);
 			const date_end = new Date(now.getFullYear(), now.getMonth() + 3);
 
-			return {
-				date: getRandomDate(date_start, date_end),
-				name: 'name_' + Math.random().toString(36).substr(2),
-				description: 'description_' + Math.random().toString(36).substr(2)
-			};
+			const id = Math.random().toString(36).substr(2);
+			const date = getRandomDate(date_start, date_end);
+			const name = 'name_' + id;
+			const description = 'description_' + id;
+			const onClick = (e) => console.log('trigger onClick for: ' + e.id);
+			const onView = (e) => console.log('trigger onView for: ' + e.id);
+			const onEdit = (e) => console.log('trigger onEdit for: ' + e.id);
+			const onDelete = (e) => console.log('trigger onDelete for: ' + e.id);
+
+			return { id, date, name, description, onClick, onView, onEdit, onDelete };
 		}
 
 		for(let i = 0; i < 100; i++) {
 			events.push(getRandomEvent());
 		}
 
-		const calendar = new Calendar(
+		new Calendar(
 			document.querySelector('.calendar'),
+			events,
 			{
-				events: events
+				onCreate: () => console.log('trigger onCreate'),
+				onDayCreate: (d) => console.log('trigger onDayCreate for: ' + d)
 			}
 		);
-
-		document.addEventListener('click', event => {
-		const prev = event.target.closest('.calendar__prev');
-		const next = event.target.closest('.calendar__next');
-		const current = event.target.closest('.calendar__current');
-		const day_open = event.target.closest('.calendar__cell');
-		const day_close = event.target.closest('.calendar__day-close');
-
-		if (prev) {
-			event.preventDefault();
-			calendar.renderPrev();
-		}
-		if (next) {
-			event.preventDefault();
-			calendar.renderNext();
-		}
-		if (current) {
-			event.preventDefault();
-			calendar.renderCustomMonth();
-		}
-		if (day_open) {
-			event.preventDefault();
-			calendar.renderDay(day_open.getAttribute('data-date'));
-		}
-		if (day_close) {
-			event.preventDefault();
-			calendar.closeDay();
-		}
-	});
-
-	document.addEventListener('click', event => {
-		document.querySelectorAll('.dropdown').forEach(dd => {
-			dd.classList.remove('active');
-		});
-
-		const dropdown = event.target.closest('.dropdown');
-		const dropdown_item = event.target.closest('.dropdown__item');
-
-		if(!dropdown) {
-			return false;
-		}
-
-		event.preventDefault();
-
-		if(dropdown_item) {
-			dropdown.classList.add('active');
-		}
-
-		dropdown.classList.toggle('active');
-	});
-
 	</script>
 
 </body>
