@@ -1,5 +1,29 @@
 class Calendar {
 	constructor(node, events, options = {}) {
+		// OPTIONS DATA
+		this.offsets = options.offsets || this.#getDefault('offsets');
+		this.labels = options.labels || this.#getDefault('labels');
+		this.icons = options.icons || this.#getDefault('icons');
+		this.events = this.#formatEvents(events);
+
+		// OPTIONS CALLBACKS
+		this.onInit = options.onInit;
+		this.onRender = options.onRender;
+		this.onUpdate = options.onUpdate;
+		this.onPrev = options.onPrev;
+		this.onNext = options.onNext;
+		this.onCurrent = options.onCurrent;
+		this.onDayOpen = options.onDayOpen;
+		this.onDayClose = options.onDayClose;
+		this.onCellClick = options.onCellClick;
+		this.onEventClick = options.onEventClick;
+		this.onEventView = options.onEventView;
+		this.onEventEdit = options.onEventEdit;
+		this.onEventDelete = options.onEventDelete;
+		this.onCreateButtonClick = options.onCreateButtonClick;
+		this.onCreateDayButtonClick = options.onCreateDayButtonClick;
+
+		// NODES
 		this.node = node;
 		this.nodeDay = null;
 		this.nodeBody = null;
@@ -12,32 +36,38 @@ class Calendar {
 		this.nodeTable = null;
 		this.nodeCells = [];
 
-		this.offsets = options.offsets || this.getDefault('offsets');
-		this.labels = options.labels || this.getDefault('labels');
-		this.icons = options.icons || this.getDefault('icons');
-		this.events = this.formatEvents(events);
-
-		this.onCreate = options.onCreate;
-		this.onDayCreate = options.onDayCreate;
-
+		// HELPERS
 		this.year = null;
 		this.month = null;
 		this.date = null;
-		this.start_date = null;
+		this.startDate = null;
 		this.today = null;
-
 		this.activeCell = null;
 
-		this.setDate(options.date);
+		// INIT
+		if (this.node) {
+			this.#setDate(options.date);
 
-		if(this.node) {
-			this.init();
-			this.initListeners();
-			this.render();
+			this.#init();
+			this.#initListeners();
+
+			if (this.onInit) {
+				this.onInit(this.node);
+			}
+
+			this.#render();
+
+			if (this.onRender) {
+				this.onRender(this.node);
+			}
 		}
 	}
 
-	init() {
+	// PROTECTED METHODS
+	#init() {
+		this.node.className = '';
+		this.node.classList.add('calendar');
+
 		this.nodeDay = document.createElement('div');
 		this.nodeDay.classList.add('calendar__day');
 
@@ -72,11 +102,10 @@ class Calendar {
 		this.nodeToolsCreate.setAttribute('type', 'button');
 		this.nodeToolsCreate.classList.add('calendar__button');
 		this.nodeToolsCreate.innerHTML = this.icons.plus + '<span>' + this.labels.create + '</span>';
-		const onCreate = this.onCreate;
-		if (onCreate) {
+		if (this.onCreateButtonClick) {
 			this.nodeToolsCreate.addEventListener('click', event => {
 				event.preventDefault();
-				onCreate(event);
+				this.onCreateButtonClick(event);
 			});
 		}
 
@@ -94,7 +123,7 @@ class Calendar {
 		this.node.appendChild(this.nodeBody);
 	}
 
-	initListeners() {
+	#initListeners() {
 		this.nodeNavPrev.addEventListener('click', event => {
 			event.preventDefault();
 			this.renderPrev();
@@ -130,7 +159,7 @@ class Calendar {
 		});
 	}
 
-	render() {
+	#render(isUpdate = false) {
 		this.nodeCells = [];
 
 		const tableRows = [];
@@ -148,16 +177,16 @@ class Calendar {
 
 		tableRows.push(tableHeader);
 
-		for (let i = 1; i < this.getWeekCount(this.year, this.month); i++) {
+		for (let i = 1; i < this.#getWeekCount(this.year, this.month); i++) {
 			const tableRow = document.createElement('div');
 			tableRow.classList.add('calendar__row');
 
-			if (this.getWeekday(this.date) > 0) {
-				this.date.setDate(this.date.getDate() - this.getWeekday(this.date));
+			if (this.#getWeekday(this.date) > 0) {
+				this.date.setDate(this.date.getDate() - this.#getWeekday(this.date));
 			}
 
 			for (let i = 0; i < 7; i++) {
-				tableRow.appendChild(this.getCell(this.date));
+				tableRow.appendChild(this.#getCell(this.date));
 				this.date.setDate(this.date.getDate() + 1);
 			}
 
@@ -168,35 +197,45 @@ class Calendar {
 
 		this.date = new Date(this.year, this.month);
 
-		this.updateTools();
+		this.#updateTools();
 
 		this.nodeDay.style.height = this.nodeBody.offsetHeight + 'px';
+
+		if (isUpdate && this.onUpdate) {
+			this.onUpdate(this.node);
+		}
 	}
 
-	getCell(date) {
+	#getCell(date) {
 		date = new Date(date.valueOf())
 
 		const cell = document.createElement('div');
 		cell.classList.add('calendar__cell');
 
-		if (this.isToday(date)) cell.classList.add('current');
-		if (date.getMonth() != this.start_date.getMonth()) cell.classList.add('muted');
+		if (this.#isToday(date)) cell.classList.add('current');
+		if (date.getMonth() != this.startDate.getMonth()) cell.classList.add('muted');
 
 		cell.date = date;
-		cell.events = this.events.filter(e => this.isDatesEqual(date, e.date)) || [];
+		cell.events = this.events.filter(e => this.#isDatesEqual(date, e.date)) || [];
 
 		const cellDate = document.createElement('div');
 		cellDate.classList.add('calendar__date');
 		cellDate.textContent = date.getDate();
 
-		cell.replaceChildren(...[cellDate, this.getCellEvents(cell.events)]);
+		cell.replaceChildren(...[cellDate, this.#getCellEvents(cell.events)]);
 
 		cell.addEventListener('click', event => {
 			event.preventDefault();
+
 			this.nodeCells.forEach(c => c.classList.remove('active'));
 			cell.classList.add('active');
+
+			if (this.onCellClick) {
+				this.onCellClick(cell);
+			}
+
 			this.activeCell = date.getTime();
-			this.renderDay(cell);
+			this.#renderDay(cell);
 		});
 
 		if (this.activeCell && date.getTime() == this.activeCell) {
@@ -208,7 +247,7 @@ class Calendar {
 		return cell;
 	}
 
-	getCellEvents(events) {
+	#getCellEvents(events) {
 		let outputed = 0, isDotsOutputed = false;
 
 		const eventsNode = document.createElement('div');
@@ -232,12 +271,13 @@ class Calendar {
 			}
 
 			eventNode.textContent = event.name;
-			eventNode.addEventListener('click', e => {
-				if(event.onClick) {
+
+			if (this.onEventClick) {
+				eventNode.addEventListener('click', e => {
 					e.preventDefault();
-					event.onClick(event);
-				}
-			});
+					this.onEventClick(event, e);
+				});
+			}
 
 			eventsNode.appendChild(eventNode);
 
@@ -247,7 +287,7 @@ class Calendar {
 		return eventsNode;
 	}
 
-	renderDay(cell) {
+	#renderDay(cell) {
 		const dayDate = cell.date;
 		const dayEvents = cell.events;
 
@@ -256,7 +296,7 @@ class Calendar {
 
 		const dayHeaderTitle = document.createElement('span');
 		dayHeaderTitle.textContent =
-			this.labels.weekday[this.getWeekday(dayDate)]
+			this.labels.weekday[this.#getWeekday(dayDate)]
 			+ ' '
 			+ dayDate.getDate()
 			+ ', '
@@ -273,6 +313,9 @@ class Calendar {
 			this.nodeCells.forEach(c => c.classList.remove('active'));
 			cell.classList.remove('active');
 			this.node.classList.remove('active');
+			if (this.onDayClose) {
+				this.onDayClose(this.nodeDay);
+			}
 		});
 
 		dayHeader.appendChild(dayHeaderTitle);
@@ -281,7 +324,7 @@ class Calendar {
 		const dayBody = document.createElement('div');
 		dayBody.classList.add('calendar__day-body');
 
-		dayBody.replaceChildren(...this.getDayEvents(dayEvents));
+		dayBody.replaceChildren(...this.#getDayEvents(dayEvents));
 
 		const dayFooter = document.createElement('div');
 		dayFooter.classList.add('calendar__day-footer');
@@ -290,11 +333,10 @@ class Calendar {
 		dayFooterCreate.setAttribute('type', 'button');
 		dayFooterCreate.classList.add('calendar__button');
 		dayFooterCreate.innerHTML = this.icons.plus + '<span>' + this.labels.create + '</span>';
-		const onDayCreate = this.onDayCreate;
-		if (onDayCreate) {
+		if (this.onCreateDayButtonClick) {
 			dayFooterCreate.addEventListener('click', event => {
 				event.preventDefault();
-				onDayCreate(cell.date, event);
+				this.onCreateDayButtonClick(cell.date, event);
 			});
 		}
 
@@ -307,9 +349,13 @@ class Calendar {
 		this.nodeDay.replaceChildren(...dayNodes);
 
 		this.node.classList.add('active');
+
+		if (this.onDayOpen) {
+			this.onDayOpen(this.nodeDay);
+		}
 	}
 
-	getDayEvents(events) {
+	#getDayEvents(events) {
 		const dayEvents = [];
 
 		events.forEach(event => {
@@ -338,7 +384,11 @@ class Calendar {
 
 			nodeEvent.appendChild(nodeEventTime);
 			nodeEvent.appendChild(nodeEventData);
-			nodeEvent.appendChild(this.getDayEventMenu(event));
+
+			const nodeMenu = this.#getDayEventMenu(event);
+			if (nodeMenu) {
+				nodeEvent.appendChild(nodeMenu);
+			}
 
 			dayEvents.push(nodeEvent);
 		});
@@ -346,7 +396,7 @@ class Calendar {
 		return dayEvents;
 	}
 
-	getDayEventMenu(event) {
+	#getDayEventMenu(event) {
 		const nodeMenu = document.createElement('button');
 		nodeMenu.setAttribute('type', 'button');
 		nodeMenu.classList.add('calendar__day-item-more');
@@ -358,67 +408,62 @@ class Calendar {
 		const nodeDropdownView = document.createElement('div');
 		nodeDropdownView.classList.add('calendar__day-menu-item');
 		nodeDropdownView.innerHTML = this.icons.view + '<span>' + this.labels.view + '</span>';
-		nodeDropdownView.addEventListener('click', e => {
-			if(event.onView) {
+		if (this.onEventView) {
+			nodeDropdownView.addEventListener('click', e => {
 				e.preventDefault();
-				event.onView(event);
-			}
-		});
+				this.onEventView(event, e);
+			});
+		}
 
 		const nodeDropdownEdit = document.createElement('div');
 		nodeDropdownEdit.classList.add('calendar__day-menu-item');
 		nodeDropdownEdit.innerHTML = this.icons.edit + '<span>' + this.labels.edit + '</span>';
-		nodeDropdownEdit.addEventListener('click', e => {
-			if(event.onEdit) {
+		if (this.onEventEdit) {
+			nodeDropdownEdit.addEventListener('click', e => {
 				e.preventDefault();
-				event.onEdit(event);
-			}
-		});
+				this.onEventEdit(event, e);
+			});
+		}
 
 		const nodeDropdownDelete = document.createElement('div');
 		nodeDropdownDelete.classList.add('calendar__day-menu-item');
 		nodeDropdownDelete.innerHTML = this.icons.delete + '<span>' + this.labels.delete + '</span>';
-		nodeDropdownDelete.addEventListener('click', e => {
-			if(event.onDelete) {
+		if (this.onEventDelete) {
+			nodeDropdownDelete.addEventListener('click', e => {
 				e.preventDefault();
-				event.onDelete(event);
-			}
-		});
+				this.onEventDelete(event, e);
+			});
+		}
 
-		nodeDropdown.appendChild(nodeDropdownView);
+		if (event.showView !== false) {
+			nodeDropdown.appendChild(nodeDropdownView);
+		}
 
 		const offset_date = new Date();
 		offset_date.setMinutes(offset_date.getMinutes() + this.offsets.edit);
 		if (new Date(event.date) > offset_date) {
-			nodeDropdown.appendChild(nodeDropdownEdit);
-			nodeDropdown.appendChild(nodeDropdownDelete);
+			if (event.showEdit !== false) {
+				nodeDropdown.appendChild(nodeDropdownEdit);
+			}
+			if (event.showDelete !== false) {
+				nodeDropdown.appendChild(nodeDropdownDelete);
+			}
 		}
 
 		nodeMenu.appendChild(nodeDropdown);
 
+		if (nodeDropdown.childElementCount < 1) {
+			return null;
+		}
+
 		return nodeMenu;
 	}
 
-  renderPrev() {
-		this.setDate(new Date(this.year, this.month - 1));
-		this.render();
-	}
-
-	renderNext() {
-		this.setDate(new Date(this.year, this.month + 1));
-		this.render();
-	}
-
-	renderCustomDate(date) {
-		this.setDate(date);
-		this.render();
-	}
-
-	updateTools() {
+	#updateTools() {
 		this.nodeNavCurrent.innerText = this.labels.month[this.month] + ' ' + this.year;
   }
 
-	formatEvents(events) {
+	#formatEvents(events) {
 		if (!events || !events.length) {
 			return []
 		}
@@ -447,32 +492,32 @@ class Calendar {
 		return events;
   }
 
-  setDate(date) {
+  #setDate(date) {
 		date = date ? new Date(date) : new Date();
 
 		this.year = date.getFullYear();
 		this.month = date.getMonth();
 		this.date = new Date(this.year, this.month);
-		this.start_date = new Date(this.year, this.month);
+		this.startDate = new Date(this.year, this.month);
 		this.today = new Date();
 		this.today.setHours(0, 0, 0, 0);
 	}
 
-  isToday(date) {
-		return this.isDatesEqual(new Date(), date);
+  #isToday(date) {
+		return this.#isDatesEqual(new Date(), date);
   }
 
-	isDatesEqual(d1, d2) {
+	#isDatesEqual(d1, d2) {
 		return (d1.toDateString() == d2.toDateString());
 	}
 
-  getWeekday(date) {
+  #getWeekday(date) {
 		let day = date.getDay();
 		if(day == 0) day = 7;
 		return day - 1;
 	}
 
-	getWeekCount(year, month_number) {
+	#getWeekCount(year, month_number) {
     const firstOfMonth = new Date(year, month_number, 1);
     const lastOfMonth = new Date(year, month_number + 1, 0);
 
@@ -481,7 +526,7 @@ class Calendar {
     return Math.ceil(used / 7);
 	}
 
-  getDefault(type) {
+  #getDefault(type) {
     switch (type.toLowerCase()) {
       case 'offsets': return {
 				create: 60,
@@ -504,5 +549,81 @@ class Calendar {
         delete: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>'
 			}
     }
-  }
+	}
+
+	// PUBLIC METHODS
+	update() {
+		this.#render(true);
+		return true;
+	}
+
+	renderPrev() {
+		this.#setDate(new Date(this.year, this.month - 1));
+
+		if (this.onPrev) {
+			this.onPrev(this.node);
+		}
+
+		this.#render(true);
+
+		return true;
+	}
+
+	renderNext() {
+		this.#setDate(new Date(this.year, this.month + 1));
+
+		if (this.onNext) {
+			this.onNext(this.node);
+		}
+
+		this.#render(true);
+
+		return true;
+	}
+
+	renderCustomDate(date) {
+		this.#setDate(date);
+
+		if (!date && this.onCurrent) {
+			this.onCurrent(this.node);
+		}
+
+		this.#render(true);
+		return true;
+	}
+
+	getEvents() {
+		return this.events;
+	}
+
+	getEventById(id) {
+		return this.events.find(e => e.id == id);
+	}
+
+	addEvent(event) {
+		if (!event || !event.id || !event.date || !event.name) {
+			return false;
+		}
+
+		this.events.push(event);
+		this.events = this.#formatEvents(this.events);
+
+		this.#render(true);
+
+		return true;
+	}
+
+	deleteEvent(id) {
+		const event = this.getEventById(id);
+
+		if (!event) {
+			return false;
+		}
+
+		this.events = this.events.filter(e => e.id != id);
+
+		this.#render(true);
+
+		return true;
+	}
 }

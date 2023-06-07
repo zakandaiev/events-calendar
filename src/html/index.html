@@ -61,11 +61,52 @@
 
 <body>
 
-	<div class="calendar"></div>
+	<div id="calendar"></div>
 
 	<script src="./index.js"></script>
 	<script>
-		const events = []
+		document.addEventListener('DOMContentLoaded', function() {
+			const events = [];
+
+			for(let i = 0; i < 100; i++) {
+				events.push(getRandomEvent());
+			}
+
+			const calendar = new Calendar(
+				document.getElementById('calendar'),
+				events,
+				{
+					offsets: null,
+					labels: null,
+					icons: null,
+
+					onInit: (e) => console.log('trigger onInit', e),
+					onRender: (e) => console.log('trigger onRender', e),
+					onUpdate: (e) => console.log('trigger onUpdate', e),
+					onPrev: (e) => console.log('trigger onPrev', e),
+					onNext: (e) => console.log('trigger onNext', e),
+					onCurrent: (e) => console.log('trigger onCurrent', e),
+					onDayOpen: (e) => console.log('trigger onDayOpen', e),
+					onDayClose: (e) => console.log('trigger onDayClose', e),
+					onCellClick: (e) => console.log('trigger onCellClick', e.date),
+					onEventClick: (e, ev) => console.log('trigger onEventClick', e, ev),
+					onEventView: (e, ev) => console.log('trigger onEventView', e, ev),
+					onEventEdit: (e, ev) => console.log('trigger onEventEdit', e, ev),
+					onEventDelete: (e, ev) => console.log('trigger onEventDelete', e, ev),
+					onCreateButtonClick: (e) => console.log('trigger onCreateButtonClick', e),
+					onCreateDayButtonClick: (e, ev) => console.log('trigger onCreateDayButtonClick', e, ev)
+				}
+			);
+
+			// calendar.update()
+			// calendar.renderPrev()
+			// calendar.renderNext()
+			// calendar.renderCustomDate('2023-10')
+			// console.log(calendar.getEvents())
+			// console.log(calendar.getEventById('id'))
+			// calendar.addEvent(getRandomEvent())
+			// calendar.deleteEvent('event_id')
+		});
 
 		function getRandomDate(start, end) {
 			return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString();
@@ -80,26 +121,12 @@
 			const date = getRandomDate(date_start, date_end);
 			const name = 'name_' + id;
 			const description = 'description_' + id;
-			const onClick = (e) => console.log('trigger onClick for: ' + e.id);
-			const onView = (e) => console.log('trigger onView for: ' + e.id);
-			const onEdit = (e) => console.log('trigger onEdit for: ' + e.id);
-			const onDelete = (e) => console.log('trigger onDelete for: ' + e.id);
+			const showView = Math.random() < 0.5;
+			const showEdit = Math.random() < 0.5;
+			const showDelete = Math.random() < 0.5;
 
-			return { id, date, name, description, onClick, onView, onEdit, onDelete };
+			return { id, date, name, description, showView, showEdit, showDelete };
 		}
-
-		for(let i = 0; i < 100; i++) {
-			events.push(getRandomEvent());
-		}
-
-		new Calendar(
-			document.querySelector('.calendar'),
-			events,
-			{
-				onCreate: () => console.log('trigger onCreate'),
-				onDayCreate: (d) => console.log('trigger onDayCreate for: ' + d)
-			}
-		);
 	</script>
 
 </body>

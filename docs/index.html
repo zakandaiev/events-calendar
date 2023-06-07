@@ -1,4 +1,45 @@
-<!DOCTYPE html><html lang="en"><head><title>Events Calendar</title><meta charset="utf-8"><meta name="author" content="github.com/zakandaiev"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=0"><link rel="icon" type="image/x-icon" sizes="any" href="./favicon.ico"><link rel="icon" type="image/svg+xml" href="./favicon.svg"><link rel="icon" type="image/png" href="./favicon.png"><link rel="apple-touch-icon" href="./favicon.png"><style>*,::after,::before{box-sizing:border-box;padding:0;margin:0}body,html{width:100%;min-width:320px;font-size:10px;position:relative}html{height:100%}body{min-height:100%}body{display:flex;justify-content:center;align-items:center;position:relative;overflow-x:hidden;font-family:sans-serif;font-size:1.6rem;font-weight:400;line-height:1.6;color:#000;background:#f5f7fb;padding:2em}</style><link rel="stylesheet" href="./index.css"></head><body><div class="calendar"></div><script src="./index.js"></script><script>const events = []
+<!DOCTYPE html><html lang="en"><head><title>Events Calendar</title><meta charset="utf-8"><meta name="author" content="github.com/zakandaiev"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=0"><link rel="icon" type="image/x-icon" sizes="any" href="./favicon.ico"><link rel="icon" type="image/svg+xml" href="./favicon.svg"><link rel="icon" type="image/png" href="./favicon.png"><link rel="apple-touch-icon" href="./favicon.png"><style>*,::after,::before{box-sizing:border-box;padding:0;margin:0}body,html{width:100%;min-width:320px;font-size:10px;position:relative}html{height:100%}body{min-height:100%}body{display:flex;justify-content:center;align-items:center;position:relative;overflow-x:hidden;font-family:sans-serif;font-size:1.6rem;font-weight:400;line-height:1.6;color:#000;background:#f5f7fb;padding:2em}</style><link rel="stylesheet" href="./index.css"></head><body><div id="calendar"></div><script src="./index.js"></script><script>document.addEventListener('DOMContentLoaded', function() {
+			const events = [];
+
+			for(let i = 0; i < 100; i++) {
+				events.push(getRandomEvent());
+			}
+
+			const calendar = new Calendar(
+				document.getElementById('calendar'),
+				events,
+				{
+					offsets: null,
+					labels: null,
+					icons: null,
+
+					onInit: (e) => console.log('trigger onInit', e),
+					onRender: (e) => console.log('trigger onRender', e),
+					onUpdate: (e) => console.log('trigger onUpdate', e),
+					onPrev: (e) => console.log('trigger onPrev', e),
+					onNext: (e) => console.log('trigger onNext', e),
+					onCurrent: (e) => console.log('trigger onCurrent', e),
+					onDayOpen: (e) => console.log('trigger onDayOpen', e),
+					onDayClose: (e) => console.log('trigger onDayClose', e),
+					onCellClick: (e) => console.log('trigger onCellClick', e.date),
+					onEventClick: (e, ev) => console.log('trigger onEventClick', e, ev),
+					onEventView: (e, ev) => console.log('trigger onEventView', e, ev),
+					onEventEdit: (e, ev) => console.log('trigger onEventEdit', e, ev),
+					onEventDelete: (e, ev) => console.log('trigger onEventDelete', e, ev),
+					onCreateButtonClick: (e) => console.log('trigger onCreateButtonClick', e),
+					onCreateDayButtonClick: (e, ev) => console.log('trigger onCreateDayButtonClick', e, ev)
+				}
+			);
+
+			// calendar.update()
+			// calendar.renderPrev()
+			// calendar.renderNext()
+			// calendar.renderCustomDate('2023-10')
+			// console.log(calendar.getEvents())
+			// console.log(calendar.getEventById('id'))
+			// calendar.addEvent(getRandomEvent())
+			// calendar.deleteEvent('event_id')
+		});
 
 		function getRandomDate(start, end) {
 			return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString();
@@ -13,23 +54,9 @@
 			const date = getRandomDate(date_start, date_end);
 			const name = 'name_' + id;
 			const description = 'description_' + id;
-			const onClick = (e) => console.log('trigger onClick for: ' + e.id);
-			const onView = (e) => console.log('trigger onView for: ' + e.id);
-			const onEdit = (e) => console.log('trigger onEdit for: ' + e.id);
-			const onDelete = (e) => console.log('trigger onDelete for: ' + e.id);
+			const showView = Math.random() < 0.5;
+			const showEdit = Math.random() < 0.5;
+			const showDelete = Math.random() < 0.5;
 
-			return { id, date, name, description, onClick, onView, onEdit, onDelete };
-		}
-
-		for(let i = 0; i < 100; i++) {
-			events.push(getRandomEvent());
-		}
-
-		new Calendar(
-			document.querySelector('.calendar'),
-			events,
-			{
-				onCreate: () => console.log('trigger onCreate'),
-				onDayCreate: (d) => console.log('trigger onDayCreate for: ' + d)
-			}
-		);</script></body></html>
+			return { id, date, name, description, showView, showEdit, showDelete };
+		}</script></body></html>
